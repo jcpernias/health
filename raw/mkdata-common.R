@@ -10,8 +10,8 @@ library(glue)
 raw_data_path <- readLines("./raw/raw-data-path.txt")
 
 # Years
-year <- c(2014, 2017, 2020, 2023)
+years <- c(2014, 2020, 2023)
 
 # Variable types
-var_types <- read_csv("./raw/var-types.csv", col_types = "cci")
+# var_types <- read_csv("./raw/var-types.csv", col_types = "cci")
 

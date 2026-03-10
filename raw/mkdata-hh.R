@@ -1,29 +1,35 @@
 source("./raw/mkdata-common.R")
 
-# Get position of variables in th households data files
-household_vars <- read_csv("./raw/household-vars.csv", col_types = "ciii") |>
-  mutate(end = start + len - 1) |>
-  left_join(var_types, join_by(var))
+household_vars <- read_csv("./raw/household-vars.csv",
+                           col_types = "cccccci")
 
 
 # Read household data for a given year
-household_yr <- function(year) {
-  vars_yr <- household_vars |>
-    filter(.data$year == .env$year)
+household_yr <- function(year, hh_vars) {
+  # Get position of variables in th households data files
+  path <- glue("./raw/household-vars-{year}.csv")
+  vars_yr <- hh_vars |>
+    select(var = all_of(glue("v_{year}")), type) |>
+    left_join(read_csv(path, col_types = "cii-"), join_by(var)) |>
+    mutate(end = start + len - 1)
+
+  # Use the same variable names for all years
+  vars_yr$var <- hh_vars$name
+
+  # Read the data
   positions <- fwf_positions(start = vars_yr$start,
                              end = vars_yr$end,
                              col_names = vars_yr$var)
-  types <- do.call(cols, setNames(as.list(hh_yr$type), hh_yr$var))
-  db_yr <- read_fwf(file.path(raw_data_path, glue("hogar_{year}.txt.xz")),
-                    col_positions = positions,
-                    col_types = types) |>
-    mutate(year = year,
-           id = glue("{IDENTHOGAR}-{year}")) |>
+  types <- do.call(cols, setNames(as.list(vars_yr$type), vars_yr$var))
+  read_fwf(file.path(raw_data_path, glue("hogar_{year}.txt.xz")),
+           col_positions = positions,
+           col_types = types) |>
+    mutate(year = year, id = glue("{IDENTHOGAR}-{year}")) |>
     select(-IDENTHOGAR)
 }
 
 # Read household data for all years
-household_db <- map(year, household_yr) |>
+household_db <- map(years, \(x) household_yr(x, household_vars)) |>
   bind_rows()
 
 # Number of households by year
@@ -61,7 +67,6 @@ household_common <-
                           n == 2 & na_class == 1 & is.na(CLASE_PR))) |>
       select(-c(n, na_class, na_inc))
   })
-
 
 # Variables for family members
 individuals_db <- household_db |>
