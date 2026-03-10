@@ -1,0 +1,13 @@
+library(dplyr)
+library(purrr)
+library(readr)
+library(glue)
+
+
+# Read path to raw data files.
+# The file `raw-data-path.txt` should contain the path to the
+# folder where the raw data files are.
+raw_data_path <- readLines("./raw/raw-data-path.txt")
+
+# Years
+year <- c(2014, 2017, 2020, 2023)

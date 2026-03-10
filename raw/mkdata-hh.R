@@ -1,16 +1,7 @@
-
-# Read path to raw data files.
-# The file `raw-data-path.txt` should contain the path to the
-# folder where the raw data files are.
-raw_data_path <- readLines("raw-data-path.txt")
-
-library(dplyr)
-library(purrr)
-library(readr)
-library(glue)
+source("./raw/mkdata-common.R")
 
 # Get position of variables in th households data files
-household_vars <- read_csv("household-vars.csv", col_types = "ciii") |>
+household_vars <- read_csv("./raw/household-vars.csv", col_types = "ciii") |>
   mutate(end = start + len - 1)
 
 
@@ -32,7 +23,6 @@ household_yr <- function(year) {
 }
 
 # Read household data for all years
-year <- c(2014, 2017, 2020, 2023)
 household_db <- map(year, household_yr) |>
   bind_rows()
 
