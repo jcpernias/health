@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 raw-data-path.txt
+*.rds

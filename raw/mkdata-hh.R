@@ -69,3 +69,5 @@ individuals_db <- household_db |>
   mutate(A10 = replace_values(A10, c("98", "99") ~ NA),
          A11 = replace_values(A11, "9" ~ NA))
 
+saveRDS(individuals_db, file = "./raw/individuals.rds", compress = "xz")
+saveRDS(household_common, file = "./raw/hh_common.rds", compress = "xz")
