@@ -2,7 +2,8 @@ source("./raw/mkdata-common.R")
 
 # Get position of variables in th households data files
 household_vars <- read_csv("./raw/household-vars.csv", col_types = "ciii") |>
-  mutate(end = start + len - 1)
+  mutate(end = start + len - 1) |>
+  left_join(var_types, join_by(var))
 
 
 # Read household data for a given year
@@ -12,8 +13,7 @@ household_yr <- function(year) {
   positions <- fwf_positions(start = vars_yr$start,
                              end = vars_yr$end,
                              col_names = vars_yr$var)
-  types <- cols(EDAD = "i", NADULTOS = "i", NMENORES = "i",
-                .default = "c")
+  types <- do.call(cols, setNames(as.list(hh_yr$type), hh_yr$var))
   db_yr <- read_fwf(file.path(raw_data_path, glue("hogar_{year}.txt.xz")),
                     col_positions = positions,
                     col_types = types) |>
