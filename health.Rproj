@@ -17,4 +17,4 @@ StripTrailingWhitespace: Yes
 
 BuildType: Makefile
 
-SpellingDictionary: en_US
+SpellingDictionary: es_ES

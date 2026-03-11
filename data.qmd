@@ -1,0 +1,101 @@
+---
+title: "Datos"
+
+lang: es
+toc-title: Contenido
+toc: true
+number-sections: true
+number-depth: 2
+format-links: false
+
+format:
+  html:
+    theme: flatly
+    embed-resources: true
+
+editor: visual
+---
+
+## Fuentes
+
+Los datos provienen de:
+
+-   Encuesta Europea de Salud de España (EESE): se usan las encuestas de 2014 y 2020.
+
+-   Encuesta de Salud de España (ESdE): se usa la edición de 2023.
+
+Se investigó la posibilidad de utilizar la Encuesta Nacional de Salud (ENSE) de 2017. No se usa por la ausencia de variables importantes para el análisis (las relacionadas con las ausencias en el trabajo, por ejemplo) y por las grandes diferencias en la codificación de algunas de las restantes variables.
+
+El muestreo que se utilizó en la recogida de los datos está diseñado para conseguir la representatividad a nivel nacional y autonómico.
+
+## Variables
+
+### Demográficas
+
+-   `age`: edad, años.
+
+-   `woman`: 1 si la observación corresponde a una mujer.
+
+-   `ccaa`: comunidad autónoma.
+
+    | valor | CCAA                        |
+    |-------|-----------------------------|
+    | AND   | Andalucía                   |
+    | ARA   | Aragón                      |
+    | AST   | Asturias, Principado de     |
+    | BAL   | Balears, Illes              |
+    | CAN   | Canarias                    |
+    | CNT   | Cantabria                   |
+    | CYL   | Castilla y León             |
+    | CLM   | Castilla - La Mancha        |
+    | CAT   | Cataluña                    |
+    | VAL   | Comunitat Valenciana        |
+    | EXT   | Extremadura                 |
+    | GAL   | Galicia                     |
+    | MAD   | Madrid, Comunidad de        |
+    | MUR   | Murcia, Región de           |
+    | NAV   | Navarra, Comunidad Foral de |
+    | PVA   | País Vasco                  |
+    | RIO   | Rioja, La                   |
+    | CEU   | Ceuta                       |
+    | MEL   | Melilla                     |
+
+-   Ficticias para el nivel de estudios:
+
+    | Ficticia  | Descripción            |
+    |-----------|------------------------|
+    | `ed_none` | Primaria no completada |
+    | `ed_prim` | Primaria               |
+    | `ed_sec`  | Secundaria             |
+    | `ed_sup`  | Superior               |
+
+### Situación laboral
+
+-   La actividad laboral se recoge en una serie de variables ficticias:
+
+    | Ficticia     | Descripción                |
+    |--------------|----------------------------|
+    | `a_working`  | Trabajando                 |
+    | `a_unempl`   | Desempleado                |
+    | `a_retired`  | Jubilado                   |
+    | `a_student`  | Estudiante                 |
+    | `a_disabled` | Incapacitado para trabajar |
+    | `a_house`    | Labores del hogar          |
+    | `a_other`    | Otros                      |
+
+-   Tipo de trabajo:
+
+    | Ficticia     | Descripción                          |
+    |--------------|--------------------------------------|
+    | `b_public`   | Funcionario                          |
+    | `b_temp`     | Temporal                             |
+    | `b_perm`     | Indefinido (incluyendo funcionarios) |
+    | `b_employer` | Empresario (con empleados)           |
+    | `b_self`     | Autónomo (sin empleados)             |
+    | `b_other`    | Otros                                |
+
+### Ausencias en el trabajo
+
+-   `e_absence`: 1 si se ha ausentado en algún momento de los 12 últimos meses por problemas de salud.
+
+-   `e_absence_days`: número de días de ausencia al trabajo en los últimos 12 meses.
