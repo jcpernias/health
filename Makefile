@@ -7,8 +7,13 @@ hh-raw-data-files := $(addprefix $(raw-dir)/, $(addsuffix .rds, hh_common indivi
 adult-raw-data-files := $(raw-dir)/adults.rds
 
 raw-data-files := $(hh-raw-data-files) $(adult-raw-data-files)
+final-data-files := $(addprefix $(proj-dir)/health., rds xlsx)
+all-data-files := $(raw-data-files) $(final-data-files)
 
-all: $(raw-data-files)
+html-files := $(proj-dir)/data.html
+
+
+all: $(all-data-files) $(html-files)
 
 
 $(hh-raw-data-files): hh-raw-data-files.intermediate
@@ -44,5 +49,16 @@ $(raw-dir)/adults.rds: $(raw-dir)/mkdata-adults.R $(adult-raw-data-deps)
 	Rscript $<
 
 
+$(final-data-files): final-data-files.intermediate
+	@:
+
+.INTERMEDIATE: final-data-files.intermediate
+
+final-data-files.intermediate: $(proj-dir)/health.R $(raw-data-files)
+	Rscript $<
+
+%.html: %.qmd
+	quarto render $<
+
 clean:
-	-@rm $(raw-data-files)
+	-@rm $(all-data-files) $(html-files)

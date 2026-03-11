@@ -36,6 +36,27 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
 
 -   `woman`: 1 si la observación corresponde a una mujer.
 
+-   `partner`: si convive con su cónyuge o pareja de hecho.
+
+-   `nadults`: número de adultos en el hogar.
+
+-   `nchildren`: número de menores de 15 años en el hogar.
+
+-   `hh_size`: número de miembros del hogar.
+
+-   Ficticias para el tipo de hogar:
+
+    | Ficticia | Descripción |
+    |-------------------------|-----------------------------------------------|
+    | `hh_a` | Hogar unipersonal |
+    | `hh_b` | Pareja sola |
+    | `hh_c` | Pareja con algún hijo menor de 25 años |
+    | `hh_d` | Pareja con todos los hijos de 25 o más años |
+    | `hh_e` | Padre o madre solo, con algún hijo menor de 25 años |
+    | `hh_f` | Padre o madre solo, con todos los hijos de 25 o más años |
+    | `hh_g` | Pareja o padre o madre solo, con algún hijo menor de 25 años y otras personas viviendo en el hogar |
+    | `hh_h` | Otro tipo de hogar |
+
 -   `ccaa`: comunidad autónoma.
 
     | valor | CCAA                        |
@@ -59,6 +80,18 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
     | RIO   | Rioja, La                   |
     | CEU   | Ceuta                       |
     | MEL   | Melilla                     |
+
+-   Tamaño del municipio de residencia:
+
+    | Ficticia   | Descripción                                     |
+    |------------|-------------------------------------------------|
+    | `urb_high` | Más de 50.000 habitantes o capital de provincia |
+    | `urb_med`  | Menos de 50.000 y más de 10.000 habitantes      |
+    | `urb_low`  | Menos de 10.000 habitantes                      |
+
+-   `native`: 1 si nació en España.
+
+### Estudios
 
 -   Ficticias para el nivel de estudios:
 
@@ -94,8 +127,87 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
     | `b_self`     | Autónomo (sin empleados)             |
     | `b_other`    | Otros                                |
 
+-   Dedicación:
+
+    | Ficticia     | Descripción       |
+    |--------------|-------------------|
+    | `b_fulltime` | A tiempo completo |
+    | `b_parttime` | A tiempo parcial  |
+
+-   `b_shift`: 1 si trabaja a turnos o la jornada laboral es irregular o variable.
+
+### Estado de salud
+
+-   `c_health_status`: estado de salud autopercibido en los últimos 12 meses:
+
+    | Valor | Descripción |
+    |-------|-------------|
+    | 1     | Muy bueno   |
+    | 2     | Bueno       |
+    | 3     | Regular     |
+    | 4     | Malo        |
+    | 5     | Muy malo    |
+
+-   `c_chronic`: 1 si enfermedad o problema de salud crónicos o de larga duración
+
+-   Grado de limitación durante al menos 6 meses por un problema de salud:
+
+    | Ficticia           | Descripción                  |
+    |--------------------|------------------------------|
+    | `c_severe_limit`   | Gravemente limitado          |
+    | `c_moderate_limit` | Limitado, pero no gravemente |
+    | `c_no_limit`       | Nada limitado                |
+
+-   Tipo de problema que causa la limitación:
+
+    | Ficticia           | Descripción |
+    |--------------------|-------------|
+    | `c_physical_limit` | Físico      |
+    | `c_mental_limit`   | Mental      |
+    | `c_both_limit`     | Ambos       |
+
 ### Ausencias en el trabajo
 
 -   `e_absence`: 1 si se ha ausentado en algún momento de los 12 últimos meses por problemas de salud.
 
 -   `e_absence_days`: número de días de ausencia al trabajo en los últimos 12 meses.
+
+### Actividad física
+
+-   `o_sedentary_work`: 1 si trabaja sentado la mayor parte de la jornada laboral.
+
+-   `o_sedentary_leisure`: 1 si no hace ejercicio y ocupa el tiempo libre de forma casi completamente sedentaria.
+
+### Consumo de tabaco
+
+-   `q_smoker`: 1 si fuma a diario.
+
+-   `q_cigs`: Número de cigarrillos que fuma al día.
+
+### Variables derivadas
+
+-   Índice de masa corporal. Variables ficticias:
+
+    | Ficticia   | Descripción           |
+    |------------|-----------------------|
+    | `bmi_low`  | Peso insuficiente     |
+    | `bmi_med`  | Normopeso y sobrepeso |
+    | `bmi_high` | Obesidad              |
+
+-   `alcohol`: consumo medio diario de alcohol (gramos de alcohol).
+
+-   `depress_severity`: Severidad de la sintomatología depresiva:
+
+    | Valor | Descripción         |
+    |-------|---------------------|
+    | 1     | Ninguna             |
+    | 2     | Leve                |
+    | 3     | Moderada            |
+    | 4     | Moderadamente grave |
+    | 5     | Grave               |
+
+-   `depress_major`: 1 si cuadro depresivo mayor.
+
+-   `depress_other`: 1 si otros cuadros depresivos.
+
+-   `depress_none`: 1 si no hay cuadros depresivos.
