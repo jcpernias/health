@@ -32,17 +32,12 @@ household_yr <- function(year, hh_vars) {
 household_db <- map(years, \(x) household_yr(x, household_vars)) |>
   bind_rows()
 
-# Number of households by year
-household_db |>
-  distinct(id, .keep_all = TRUE) |>
-  count(year)
-
 # Extract common variables across household members
 household_common <-
   local({
     # Drop redundant records and recode NAs
     db <- household_db |>
-      select(-c(SEXO, EDAD, A10, A11)) |>
+      select(-c(SEXO, EDAD, NORDEN, A10, A11)) |>
       distinct() |>
       mutate(INGRESOS = replace_values(INGRESOS, c("98", "99") ~ NA),
              CLASE_PR = replace_values(CLASE_PR, "9" ~ NA))
@@ -70,7 +65,7 @@ household_common <-
 
 # Variables for family members
 individuals_db <- household_db |>
-  select(SEXO, EDAD, A10, A11, id, year) |>
+  select(SEXO, EDAD, NORDEN, A10, A11, id, year) |>
   mutate(A10 = replace_values(A10, c("98", "99") ~ NA),
          A11 = replace_values(A11, "9" ~ NA))
 
