@@ -48,6 +48,8 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
 
 ### Demográficas
 
+-   `year`: año en que se realizó la encuesta (2014, 2020, 2023).
+
 -   `age`: edad, años.
 
 -   `woman`: 1 si la observación corresponde a una mujer.
@@ -63,7 +65,7 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
 -   Ficticias para el tipo de hogar:
 
     | Ficticia | Descripción |
-    |-------------------------|----------------------------------------------|
+    |--------------------------|----------------------------------------------|
     | `hh_a` | Hogar unipersonal |
     | `hh_b` | Pareja sola |
     | `hh_c` | Pareja con algún hijo menor de 25 años |
