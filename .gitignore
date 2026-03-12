@@ -6,3 +6,4 @@ raw-data-path.txt
 *.rds
 *.html
 *.xlsx
+*.pdf
