@@ -11,9 +11,11 @@ final-data-files := $(addprefix $(proj-dir)/health., rds xlsx)
 all-data-files := $(raw-data-files) $(final-data-files)
 
 html-files := $(proj-dir)/data.html
+pdf-files := $(proj-dir)/data.pdf
+doc-files := $(html-files) $(pdf-files)
 
 
-all: $(all-data-files) $(html-files)
+all: $(all-data-files) $(doc-files)
 
 
 $(hh-raw-data-files): hh-raw-data-files.intermediate
@@ -58,7 +60,11 @@ final-data-files.intermediate: $(proj-dir)/health.R $(raw-data-files)
 	Rscript $<
 
 %.html: %.qmd
-	quarto render $<
+	quarto render $< --to html
+
+%.pdf: %.qmd
+	quarto render $< --to pdf
+
 
 clean:
-	-@rm $(all-data-files) $(html-files)
+	-@rm $(all-data-files) $(doc-files)

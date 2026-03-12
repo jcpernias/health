@@ -1,17 +1,33 @@
 ---
-title: "Datos"
+title: "Variables"
+
+date: 2026/03/12
+date-format: long
 
 lang: es
-toc-title: Contenido
-toc: true
-number-sections: true
-number-depth: 2
-format-links: false
+execute: 
+  echo: false
 
-format:
+tbl-colwidths: [30, 70]
+
+toc: true
+toc-title: Contenido
+number-sections: true
+number-depth: 3
+
+format: 
   html:
-    theme: flatly
     embed-resources: true
+    theme: cosmo
+    html-math-method: katex
+  pdf:
+    papersize: a4
+    documentclass: article
+    colorlinks: true
+    pdf-engine: lualatex
+    mainfont: Alegreya
+    sansfont: Roboto
+    monofont: "Fira Code"
 
 editor: visual
 ---
@@ -47,7 +63,7 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
 -   Ficticias para el tipo de hogar:
 
     | Ficticia | Descripción |
-    |-------------------------|-----------------------------------------------|
+    |-------------------------|----------------------------------------------|
     | `hh_a` | Hogar unipersonal |
     | `hh_b` | Pareja sola |
     | `hh_c` | Pareja con algún hijo menor de 25 años |
@@ -59,7 +75,7 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
 
 -   `ccaa`: comunidad autónoma.
 
-    | valor | CCAA                        |
+    | Valor | CCAA                        |
     |-------|-----------------------------|
     | AND   | Andalucía                   |
     | ARA   | Aragón                      |
