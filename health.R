@@ -77,7 +77,7 @@ db <- readRDS("./raw/adults.rds") |>
     b_self     = dummy(B8, "06", na = c("98", "99")),
     b_other    = dummy(B8, c("04", "07", "08", "09"), na = c("98", "99")),
     b_fulltime = dummy(B11, "1", na = c("8", "9")),
-    b_parttime = dummy(B11, "1", na = c("8", "9")),
+    b_parttime = dummy(B11, "2", na = c("8", "9")),
     b_shift = dummy(B12, c("06", "07", "08"), na = c("98", "99")),
     c_health_status = as.integer(C1),
     c_chronic = dummy(C2, "1", na = c("8", "9")),
@@ -88,7 +88,7 @@ db <- readRDS("./raw/adults.rds") |>
     c_mental_limit   = dummy(C3b, "2", na = c("8", "9")),
     c_both_limit     = dummy(C3b, "3", na = c("8", "9")),
     e_absence = dummy(E1, "1", na = c("8", "9")),
-    e_absence_days = replace_values(E2, NA ~ 0),
+    e_absence_days = if_else(e_absence == 0, 0, replace_values(E2, 998:999 ~ NA)),
     o_sedentary_work =
       dummy(O1, "1", na = c("5", "8", "9")) * replace_values(a_working, 0 ~ NA),
     o_sedentary_leisure = dummy(O2, "1", na = c("8", "9")),
