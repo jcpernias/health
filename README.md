@@ -57,6 +57,26 @@ que se elimina al terminar el cálculo, también si se produce un error. Las
 huellas de referencia se han regenerado con esta definición, tras comprobar que
 los XZ originales coincidían con las referencias anteriores.
 
+
+Los cálculos locales se guardan en `raw/checksums-local.csv`, excluido de Git,
+con tres columnas: `file`, `md5_local` y `md5_time`. Este CSV no modifica las
+referencias aceptadas de `raw/checksums.csv`.
+
+Si no existe el caché, se crea uno vacío. Para los archivos seleccionados se
+calcula el MD5 si falta su fecha de cálculo o si el archivo se ha modificado
+posteriormente. Si no hay cálculos nuevos, el CSV no se reescribe.
+
+`md5_uncompressed()` devuelve `NA_character_` si ocurre un error, incluidas las
+advertencias de descompresión. Así se continúa con los demás archivos. La fecha
+`md5_time` registra el momento del intento, también si falla: basta el MD5 ausente
+para detectar el error. Si el resultado contiene algún NA, se imprime, se
+eliminan esas filas, se guarda el caché restante y se termina con código de error
+para detener Make. Si no hay errores de cálculo, se comparan las huellas con las
+referencias aceptadas.
+
+Al trasladar o restaurar datos que conserven fechas de modificación antiguas,
+borre el caché local para forzar una nueva comprobación.
+
 ## Requisitos y construcción
 
 Se necesita Make y R con los paquetes `tidyverse`, `writexl` y `glue`.
@@ -82,10 +102,11 @@ nueva versión de los microdatos y revisar su procedencia.
 
 ## Archivos generados
 
+- `raw/checksums-local.csv`: cálculos MD5 locales reutilizables.
 - `raw/adults.rds`, `raw/hh_common.rds` y `raw/individuals.rds`: datos intermedios.
 - `health.rds`: base con variables originales y derivadas.
 - `health.xlsx`: base con las variables seleccionadas para el TFG.
 - `data.html` y `data.pdf`: documentación elaborada a partir de `data.qmd`.
 
 `make clean` elimina las salidas anteriores; conserva los microdatos XZ y sus
-huellas de referencia.
+huellas de referencia y los cálculos locales.
