@@ -19,7 +19,7 @@ doc-files := $(html-files) $(pdf-files)
 
 all: check-raw-data $(all-data-files) $(doc-files)
 
-check-raw-data: $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(raw-dir)/years.csv
+check-raw-data: $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.csv
 	Rscript "$(raw-dir)/check-data.R" "$(raw-dir)"
 
 # Validate even when generated data are already up to date, without forcing
@@ -32,7 +32,7 @@ $(hh-raw-data-files): hh-raw-data-files.intermediate
 
 .INTERMEDIATE: hh-raw-data-files.intermediate
 
-common-deps := $(raw-dir)/years.csv
+common-deps := $(proj-dir)/years.csv
 
 hh-raw-data-deps := \
 	$(common-deps) \

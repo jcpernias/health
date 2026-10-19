@@ -5,7 +5,9 @@ documentación de las variables seleccionadas.
 
 ## Selección de años
 
-Los años que se incluirán en la base se indican en `raw/years.csv`:
+Los años que se incluirán en la base se indican en el archivo de configuración
+`years.csv`, situado en el directorio principal del repositorio. Debe tener dos
+columnas: `year`, con los años, e `include`, con valores 0 o 1:
 
 ```csv
 year,include
@@ -27,7 +29,7 @@ que sea un año admitido no garantiza su comparabilidad con las demás encuestas
 ## Microdatos originales necesarios
 
 **Los microdatos no se distribuyen con el repositorio. Cada usuario debe aportar
-los archivos de adultos y hogares de los años seleccionados en `raw/years.csv`
+los archivos de adultos y hogares de los años seleccionados en `years.csv`
 y colocarlos, sin descomprimir, en la carpeta `raw/`.** Los nombres para las
 cuatro ediciones admitidas son:
 
@@ -49,8 +51,11 @@ Las huellas MD5 de los ocho archivos de referencia se guardan en
 `raw/checksums.csv`, que sí forma parte del repositorio. La comprobación usa
 `raw/check-data.R`, con `tidyverse` y el paquete `tools` incluido en R. Solo se
 comprueban los archivos correspondientes a los años seleccionados. Las huellas
-se calculan sobre los archivos comprimidos: recomprimir los mismos datos puede
-cambiar la huella.
+se calculan sobre el contenido sin comprimir: recomprimir los mismos datos no
+cambia la huella. Cada archivo se descomprime por bloques en un archivo temporal,
+que se elimina al terminar el cálculo, también si se produce un error. Las
+huellas de referencia se han regenerado con esta definición, tras comprobar que
+los XZ originales coincidían con las referencias anteriores.
 
 ## Requisitos y construcción
 

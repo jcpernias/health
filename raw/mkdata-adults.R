@@ -4,7 +4,7 @@ library(readr)
 library(glue)
 
 # Read years to be included in the final databasea
-years <- read_csv("./raw/years.csv") |>
+years <- read_csv("./years.csv") |>
   filter(include == 1) |>
   pull(year)
 
