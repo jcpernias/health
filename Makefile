@@ -15,7 +15,16 @@ pdf-files := $(proj-dir)/data.pdf
 doc-files := $(html-files) $(pdf-files)
 
 
-all: $(all-data-files) $(doc-files)
+.PHONY: all clean check-raw-data
+
+all: check-raw-data $(all-data-files) $(doc-files)
+
+check-raw-data: $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(raw-dir)/years.csv
+	Rscript "$(raw-dir)/check-data.R" "$(raw-dir)"
+
+# Validate even when generated data are already up to date, without forcing
+# their reconstruction. Also guard the recipes that produce multiple files.
+$(all-data-files) hh-raw-data-files.intermediate final-data-files.intermediate: | check-raw-data
 
 
 $(hh-raw-data-files): hh-raw-data-files.intermediate
@@ -23,12 +32,13 @@ $(hh-raw-data-files): hh-raw-data-files.intermediate
 
 .INTERMEDIATE: hh-raw-data-files.intermediate
 
-common-deps := \
-	$(raw-dir)/mkdata-common.R \
-	$(raw-dir)/raw-data-path.txt
+common-deps := $(raw-dir)/years.csv
 
 hh-raw-data-deps := \
 	$(common-deps) \
+	$(raw-dir)/hogar_2014.txt.xz \
+	$(raw-dir)/hogar_2020.txt.xz \
+	$(raw-dir)/hogar_2023.txt.xz \
 	$(raw-dir)/household-vars.csv \
 	$(raw-dir)/household-vars-2014.csv \
 	$(raw-dir)/household-vars-2017.csv \
@@ -41,6 +51,9 @@ hh-raw-data-files.intermediate: $(raw-dir)/mkdata-hh.R $(hh-raw-data-deps)
 
 adult-raw-data-deps := \
 	$(common-deps) \
+	$(raw-dir)/adultos_2014.txt.xz \
+	$(raw-dir)/adultos_2020.txt.xz \
+	$(raw-dir)/adultos_2023.txt.xz \
 	$(raw-dir)/adult-vars.csv \
 	$(raw-dir)/adult-vars-2014.csv \
 	$(raw-dir)/adult-vars-2017.csv \

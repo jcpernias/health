@@ -1,11 +1,19 @@
-source("./raw/mkdata-common.R")
+library(dplyr)
+library(purrr)
+library(readr)
+library(glue)
+
+# Read years to be included in the final databasea
+years <- read_csv("./raw/years.csv") |>
+  filter(include == 1) |>
+  pull(year)
 
 adult_vars <- read_csv("./raw/adult-vars.csv",
                            col_types = "cccccci")
 
 # Read household data for a given year
 adult_yr <- function(year, adult_vars) {
-  # Get position of variables in th households data files
+  # Get position of variables in the households data files
   path <- glue("./raw/adult-vars-{year}.csv")
   vars_yr <- adult_vars |>
     select(var = all_of(glue("v_{year}")), type) |>
@@ -20,7 +28,7 @@ adult_yr <- function(year, adult_vars) {
                              end = vars_yr$end,
                              col_names = vars_yr$var)
   types <- do.call(cols, setNames(as.list(vars_yr$type), vars_yr$var))
-  read_fwf(file.path(raw_data_path, glue("adultos_{year}.txt.xz")),
+  read_fwf(glue("./raw/adultos_{year}.txt.xz"),
            col_positions = positions,
            col_types = types) |>
     mutate(year = year, id = glue("{IDENTHOGAR}-{year}")) |>
@@ -38,4 +46,3 @@ adult_db |>
   count(year)
 
 saveRDS(adult_db, file = "./raw/adults.rds", compress = "xz")
-

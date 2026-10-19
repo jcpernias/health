@@ -1,12 +1,19 @@
-source("./raw/mkdata-common.R")
+library(dplyr)
+library(purrr)
+library(readr)
+library(glue)
+
+# Read years to be included in the final database
+years <- read_csv("./raw/years.csv") |>
+  filter(include == 1) |>
+  pull(year)
 
 household_vars <- read_csv("./raw/household-vars.csv",
                            col_types = "cccccci")
 
-
 # Read household data for a given year
 household_yr <- function(year, hh_vars) {
-  # Get position of variables in th households data files
+  # Get position of variables in the households data files
   path <- glue("./raw/household-vars-{year}.csv")
   vars_yr <- hh_vars |>
     select(var = all_of(glue("v_{year}")), type) |>
@@ -21,7 +28,7 @@ household_yr <- function(year, hh_vars) {
                              end = vars_yr$end,
                              col_names = vars_yr$var)
   types <- do.call(cols, setNames(as.list(vars_yr$type), vars_yr$var))
-  read_fwf(file.path(raw_data_path, glue("hogar_{year}.txt.xz")),
+  read_fwf(glue("./raw/hogar_{year}.txt.xz"),
            col_positions = positions,
            col_types = types) |>
     mutate(year = year, id = glue("{IDENTHOGAR}-{year}")) |>

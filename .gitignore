@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-raw-data-path.txt
+/raw/*.xz
 *.rds
 *.html
 *.xlsx
