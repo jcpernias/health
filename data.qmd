@@ -107,7 +107,7 @@ El muestreo que se utilizó en la recogida de los datos está diseñado para con
     | `urb_med`  | Menos de 50.000 y más de 10.000 habitantes      |
     | `urb_low`  | Menos de 10.000 habitantes                      |
 
--   `native`: 1 si nació en España.
+-   `native`: 1 si tiene nacionalidad española; 0 en caso contrario.
 
 ### Estudios
 
