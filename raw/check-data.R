@@ -4,6 +4,55 @@ suppressPackageStartupMessages(library(tidyverse))
 args <- commandArgs(trailingOnly = TRUE)
 raw_dir <- if (length(args) == 0L) "./raw" else args[[1L]]
 
+#' Decompress an XZ file
+#'
+#' @param file A character string giving the path to an XZ-compressed file.
+#' @param path A character string giving the output path. If `NULL` (the
+#'   default), a temporary file is created.
+#'
+#' @return The path to the created file, or `NA_character_` if decompression
+#'   fails. The caller is responsible for removing the file after use.
+#'
+#' @details Decompresses in 1 MiB blocks without loading the entire content
+#'   into memory. Connections are closed before returning. Warnings are treated
+#'   as errors, and an incomplete output file is removed on failure.
+#'   An existing file at `path` is overwritten.
+#'
+#' @examples
+#' source <- tempfile(fileext = ".xz")
+#' con <- xzfile(source, open = "wb")
+#' writeBin(charToRaw("Example data"), con)
+#' close(con)
+#' unpacked <- decompress_xz(source)
+#' unlink(c(source, unpacked))
+#'
+#' @export
+decompress_xz <- function(file, path = NULL) {
+  tryCatch(
+    # local() ejecuta la limpieza antes de que tryCatch devuelva NA.
+    withCallingHandlers(local({
+      if (is.null(path)) path <- tempfile()
+      complete <- FALSE
+
+      input <- xzfile(file, open = "rb")
+      on.exit(close(input), add = TRUE)
+      output <- base::file(path, open = "wb")
+      on.exit(if (!complete) unlink(path), add = TRUE)
+      tryCatch({
+        repeat {
+          chunk <- readBin(input, what = "raw", n = 1024L * 1024L)
+          if (length(chunk) == 0L) break
+          writeBin(chunk, output)
+        }
+      }, finally = close(output))
+
+      complete <- TRUE
+      path
+    }), warning = function(w) stop(conditionMessage(w), call. = FALSE)),
+    error = function(e) NA_character_
+  )
+}
+
 #' Compute the MD5 checksum of an XZ file's uncompressed content
 #'
 #' @param path A character string giving the path to an XZ-compressed file.
@@ -11,12 +60,11 @@ raw_dir <- if (length(args) == 0L) "./raw" else args[[1L]]
 #' @return An unnamed character string containing the MD5 checksum of the
 #'   uncompressed bytes, or `NA_character_` if the calculation fails.
 #'
-#' @details The file is decompressed in 1 MiB blocks into a temporary file,
-#'   without loading the entire content into memory. The temporary file is
-#'   removed on exit, including when an error occurs. Decompression warnings
-#'   are treated as errors. Errors are caught and return `NA_character_`, allowing
-#'   the caller to continue processing other files and report failures later.
-#'   Recompressing identical bytes preserves the checksum.
+#' @details Uses [decompress_xz()] to decompress into a temporary file, which
+#'   is removed on exit, including when an error occurs. Errors are caught and
+#'   return `NA_character_`, allowing the caller to continue processing other
+#'   files and report failures later. Recompressing identical bytes preserves
+#'   the checksum.
 #'
 #' @examples
 #' path <- tempfile(fileext = ".xz")
@@ -29,23 +77,11 @@ raw_dir <- if (length(args) == 0L) "./raw" else args[[1L]]
 #' @export
 md5_uncompressed <- function(path) {
   tryCatch(
-    # local() ejecuta la limpieza antes de que tryCatch devuelva NA.
     withCallingHandlers(local({
-      unpacked <- tempfile()
+      unpacked <- decompress_xz(path)
+      if (is.na(unpacked)) return(NA_character_)
       on.exit(unlink(unpacked), add = TRUE)
 
-      input <- xzfile(path, open = "rb")
-      on.exit(close(input), add = TRUE)
-      output <- file(unpacked, open = "wb")
-      tryCatch({
-        repeat {
-          chunk <- readBin(input, what = "raw", n = 1024L * 1024L)
-          if (length(chunk) == 0L) break
-          writeBin(chunk, output)
-        }
-      }, finally = close(output))
-
-      # La salida ya está cerrada: todos los bytes están escritos antes del MD5.
       unname(tools::md5sum(unpacked))
     }), warning = function(w) stop(conditionMessage(w), call. = FALSE)),
     error = function(e) NA_character_
