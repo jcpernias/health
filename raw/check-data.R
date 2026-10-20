@@ -88,25 +88,19 @@ md5_uncompressed <- function(path) {
   )
 }
 
-# Read years to be included in the final database
-year_config <- read_csv("./years.csv",
-  col_types = "ii")
+# Read one selected year per line; validate before converting to integers.
+years <- readLines("./years.txt", warn = FALSE)
+valid_years <- c("2014", "2017", "2020", "2023")
 
-# Check years.csv is valid
-valid_years <- c(2014L, 2017L, 2020L, 2023L)
-
-if (anyNA(year_config) ||
-      anyDuplicated(year_config$year) ||
-      !all(year_config$year %in% valid_years) ||
-      !all(year_config$include %in% c(0L, 1L)) ||
-      all(year_config$include == 0L)) {
-  print(year_config)
+if (length(years) == 0L ||
+      anyDuplicated(years) ||
+      !all(years %in% valid_years)) {
+  cat("Invalid years.txt: specify one valid year per line, without duplicates.\n")
+  print(years)
   quit(status = 1L)
 }
 
-years <- year_config |>
-  filter(include == 1) |>
-  pull(year)
+years <- as.integer(years)
 
 
 # Combinar cada año seleccionado con los archivos de adultos y hogares.

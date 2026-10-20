@@ -3,10 +3,8 @@ library(purrr)
 library(readr)
 library(glue)
 
-# Read years to be included in the final databasea
-years <- read_csv("./years.csv") |>
-  filter(include == 1) |>
-  pull(year)
+# Read years to be included in the final database
+years <- as.integer(readLines("./years.txt", warn = FALSE))
 
 adult_vars <- read_csv("./raw/adult-vars.csv",
                            col_types = "cccccci")

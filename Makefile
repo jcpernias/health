@@ -3,6 +3,11 @@ SHELL := /bin/sh
 proj-dir := .
 raw-dir := $(proj-dir)/raw
 
+# Read selected years
+selected-years := $(strip $(file < $(proj-dir)/years.txt))
+hh-microdata-files := $(addprefix $(raw-dir)/hogar_, $(addsuffix .txt.xz, $(selected-years)))
+adult-microdata-files := $(addprefix $(raw-dir)/adultos_, $(addsuffix .txt.xz, $(selected-years)))
+
 hh-raw-data-files := $(addprefix $(raw-dir)/, $(addsuffix .rds, hh_common individuals))
 adult-raw-data-files := $(raw-dir)/adults.rds
 
@@ -19,7 +24,7 @@ doc-files := $(html-files) $(pdf-files)
 
 all: check-raw-data $(all-data-files) $(doc-files)
 
-check-raw-data: $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.csv
+check-raw-data: $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.txt
 	Rscript "$(raw-dir)/check-data.R" "$(raw-dir)"
 
 # Validate even when generated data are already up to date, without forcing
@@ -32,13 +37,11 @@ $(hh-raw-data-files): hh-raw-data-files.intermediate
 
 .INTERMEDIATE: hh-raw-data-files.intermediate
 
-common-deps := $(proj-dir)/years.csv
+common-deps := $(proj-dir)/years.txt
 
 hh-raw-data-deps := \
 	$(common-deps) \
-	$(raw-dir)/hogar_2014.txt.xz \
-	$(raw-dir)/hogar_2020.txt.xz \
-	$(raw-dir)/hogar_2023.txt.xz \
+	$(hh-microdata-files) \
 	$(raw-dir)/household-vars.csv \
 	$(raw-dir)/household-vars-2014.csv \
 	$(raw-dir)/household-vars-2017.csv \
@@ -51,9 +54,7 @@ hh-raw-data-files.intermediate: $(raw-dir)/mkdata-hh.R $(hh-raw-data-deps)
 
 adult-raw-data-deps := \
 	$(common-deps) \
-	$(raw-dir)/adultos_2014.txt.xz \
-	$(raw-dir)/adultos_2020.txt.xz \
-	$(raw-dir)/adultos_2023.txt.xz \
+	$(adult-microdata-files) \
 	$(raw-dir)/adult-vars.csv \
 	$(raw-dir)/adult-vars-2014.csv \
 	$(raw-dir)/adult-vars-2017.csv \

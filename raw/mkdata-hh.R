@@ -4,9 +4,7 @@ library(readr)
 library(glue)
 
 # Read years to be included in the final database
-years <- read_csv("./years.csv") |>
-  filter(include == 1) |>
-  pull(year)
+years <- as.integer(readLines("./years.txt", warn = FALSE))
 
 household_vars <- read_csv("./raw/household-vars.csv",
                            col_types = "cccccci")

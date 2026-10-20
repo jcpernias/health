@@ -5,22 +5,21 @@ documentación de las variables seleccionadas.
 
 ## Selección de años
 
-Los años que se incluirán en la base se indican en el archivo de configuración
-`years.csv`, situado en el directorio principal del repositorio. Debe tener dos
-columnas: `year`, con los años, e `include`, con valores 0 o 1:
+Los años que se incluirán en la base se indican en `years.txt`, situado en el
+directorio principal del repositorio, con un año por línea y sin cabecera:
 
-```csv
-year,include
-2014,1
-2017,0
-2020,1
-2023,1
+```text
+2014
+2020
+2023
 ```
 
-`include = 1` selecciona una edición y `include = 0` la excluye. Los únicos
-años admitidos son **2014, 2017, 2020 y 2023**. Los años no pueden repetirse y
-debe seleccionarse al menos uno. La comprobación previa valida esta configuración.
-Al modificarla, Make vuelve a construir los datos.
+Los únicos años admitidos son **2014, 2017, 2020 y 2023**. Debe indicarse al menos
+uno, sin repeticiones ni líneas vacías. `check-data.R` valida el formato antes
+de preparar los datos. Para excluir un año, elimine su línea del archivo.
+Al modificar la selección, Make vuelve a construir los datos. Las dependencias de los
+microdatos se ajustan a los años seleccionados: cambiar un XZ seleccionado
+reconstruye los datos correspondientes, y no se exigen XZ de años excluidos.
 
 La selección actual es 2014, 2020 y 2023. Incluir 2017 requiere revisar las
 correspondencias y el tratamiento de las variables no disponibles en esa edición;
@@ -29,7 +28,7 @@ que sea un año admitido no garantiza su comparabilidad con las demás encuestas
 ## Microdatos originales necesarios
 
 **Los microdatos no se distribuyen con el repositorio. Cada usuario debe aportar
-los archivos de adultos y hogares de los años seleccionados en `years.csv`
+los archivos de adultos y hogares de los años seleccionados en `years.txt`
 y colocarlos, sin descomprimir, en la carpeta `raw/`.** Los nombres para las
 cuatro ediciones admitidas son:
 
