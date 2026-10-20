@@ -10,10 +10,12 @@ years <- read_years()
 
 
 # Combinar cada año seleccionado con los archivos de adultos y hogares.
-fnames <-
-  pmap(expand_grid(x = c("adultos", "hogar"), y = years),
-    \(x, y) paste0(x, "_", y, ".txt.xz")) |>
-  unlist()
+fnames <- expand_grid(
+  type = c("adultos", "hogar"),
+  year = years
+) |>
+  mutate(file = paste0(type, "_", year, ".txt.xz")) |>
+  pull(file)
 
 paths <- file.path(raw_dir, fnames)
 # Si falta algún archivo, no merece la pena continuar: detener Make antes
