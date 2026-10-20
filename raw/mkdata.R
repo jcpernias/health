@@ -50,22 +50,18 @@ household_common <-
       mutate(INGRESOS = replace_values(INGRESOS, c("98", "99") ~ NA),
              CLASE_PR = replace_values(CLASE_PR, "9" ~ NA))
 
-    # Find households with more than one record
-    reps <- db |> count(id)
-
-    # Find households with NAs
-    na_inc <- db |>
+    # Count records and missing values in a single summary per household.
+    hh_summary <- db |>
       group_by(id) |>
-      summarise(na_inc = sum(is.na(INGRESOS)))
-
-    na_class <- db |>
-      group_by(id) |>
-      summarise(na_class = sum(is.na(CLASE_PR)))
+      summarise(
+        n = n(),
+        na_inc = sum(is.na(INGRESOS)),
+        na_class = sum(is.na(CLASE_PR)),
+        .groups = "drop"
+      )
 
     db |>
-      left_join(reps, join_by(id)) |>
-      left_join(na_inc, join_by(id)) |>
-      left_join(na_class, join_by(id)) |>
+      left_join(hh_summary, join_by(id)) |>
       filter_out(when_any(n == 2 & na_inc == 1 & is.na(INGRESOS),
                           n == 2 & na_class == 1 & is.na(CLASE_PR))) |>
       select(-c(n, na_class, na_inc))
