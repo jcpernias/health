@@ -16,7 +16,8 @@ directorio principal del repositorio, con un año por línea y sin cabecera:
 
 Los únicos años admitidos son **2014, 2017, 2020 y 2023**. Debe indicarse al menos
 uno, sin repeticiones ni líneas vacías. `check-data.R` valida el formato antes
-de preparar los datos. Para excluir un año, elimine su línea del archivo.
+de preparar los datos mediante `read_years()`, compartida también por el
+programa de preparación `raw/mkdata.R`. Para excluir un año, elimine su línea del archivo.
 Al modificar la selección, Make vuelve a construir los datos. Las dependencias de los
 microdatos se ajustan a los años seleccionados: cambiar un XZ seleccionado
 reconstruye los datos correspondientes, y no se exigen XZ de años excluidos.
@@ -78,6 +79,14 @@ borre el caché local para forzar una nueva comprobación.
 
 ## Requisitos y construcción
 
+Las funciones compartidas se encuentran en `raw/utils.R`: `read_years()` lee y
+valida la selección; `decompress_xz()` y `md5_uncompressed()` descomprimen y
+calculan huellas; `read_cache()` mantiene el caché local de huellas;
+`read_microdata()` reúne la lectura y armonización común de
+adultos y hogares. `raw/mkdata.R` prepara ambos conjuntos de datos y aplica sus
+transformaciones específicas en una única ejecución.
+Make incluye este archivo entre las dependencias de la preparación de datos.
+
 Se necesita Make y R con los paquetes `tidyverse`, `writexl` y `glue`.
 La versión de `dplyr` debe incluir `recode_values`, `replace_values`,
 `filter_out` y `when_any`. Para la documentación se necesita Quarto y, para el
@@ -102,7 +111,8 @@ nueva versión de los microdatos y revisar su procedencia.
 ## Archivos generados
 
 - `raw/checksums-local.csv`: cálculos MD5 locales reutilizables.
-- `raw/adults.rds`, `raw/hh_common.rds` y `raw/individuals.rds`: datos intermedios.
+- `raw/adults.rds`, `raw/hh_common.rds` y `raw/individuals.rds`: datos intermedios
+  generados conjuntamente por `raw/mkdata.R`.
 - `health.rds`: base con variables originales y derivadas.
 - `health.xlsx`: base con las variables seleccionadas para el TFG.
 - `data.html` y `data.pdf`: documentación elaborada a partir de `data.qmd`.

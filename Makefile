@@ -8,10 +8,7 @@ selected-years := $(strip $(file < $(proj-dir)/years.txt))
 hh-microdata-files := $(addprefix $(raw-dir)/hogar_, $(addsuffix .txt.xz, $(selected-years)))
 adult-microdata-files := $(addprefix $(raw-dir)/adultos_, $(addsuffix .txt.xz, $(selected-years)))
 
-hh-raw-data-files := $(addprefix $(raw-dir)/, $(addsuffix .rds, hh_common individuals))
-adult-raw-data-files := $(raw-dir)/adults.rds
-
-raw-data-files := $(hh-raw-data-files) $(adult-raw-data-files)
+raw-data-files := $(addprefix $(raw-dir)/, $(addsuffix .rds, adults hh_common individuals))
 final-data-files := $(addprefix $(proj-dir)/health., rds xlsx)
 all-data-files := $(raw-data-files) $(final-data-files)
 
@@ -24,44 +21,36 @@ doc-files := $(html-files) $(pdf-files)
 
 all: check-raw-data $(all-data-files) $(doc-files)
 
-check-raw-data: $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.txt
+check-raw-data: $(raw-dir)/utils.R $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.txt
 	Rscript "$(raw-dir)/check-data.R" "$(raw-dir)"
 
 # Validate even when generated data are already up to date, without forcing
 # their reconstruction. Also guard the recipes that produce multiple files.
-$(all-data-files) hh-raw-data-files.intermediate final-data-files.intermediate: | check-raw-data
+$(all-data-files) raw-data-files.intermediate final-data-files.intermediate: | check-raw-data
 
 
-$(hh-raw-data-files): hh-raw-data-files.intermediate
+$(raw-data-files): raw-data-files.intermediate
 	@:
 
-.INTERMEDIATE: hh-raw-data-files.intermediate
+.INTERMEDIATE: raw-data-files.intermediate
 
-common-deps := $(proj-dir)/years.txt
-
-hh-raw-data-deps := \
-	$(common-deps) \
+raw-data-deps := \
+	$(proj-dir)/years.txt \
+	$(raw-dir)/utils.R \
 	$(hh-microdata-files) \
+	$(adult-microdata-files) \
 	$(raw-dir)/household-vars.csv \
 	$(raw-dir)/household-vars-2014.csv \
 	$(raw-dir)/household-vars-2017.csv \
 	$(raw-dir)/household-vars-2020.csv \
-	$(raw-dir)/household-vars-2023.csv
-
-
-hh-raw-data-files.intermediate: $(raw-dir)/mkdata-hh.R $(hh-raw-data-deps)
-	Rscript $<
-
-adult-raw-data-deps := \
-	$(common-deps) \
-	$(adult-microdata-files) \
+	$(raw-dir)/household-vars-2023.csv \
 	$(raw-dir)/adult-vars.csv \
 	$(raw-dir)/adult-vars-2014.csv \
 	$(raw-dir)/adult-vars-2017.csv \
 	$(raw-dir)/adult-vars-2020.csv \
 	$(raw-dir)/adult-vars-2023.csv
 
-$(raw-dir)/adults.rds: $(raw-dir)/mkdata-adults.R $(adult-raw-data-deps)
+raw-data-files.intermediate: $(raw-dir)/mkdata.R $(raw-data-deps)
 	Rscript $<
 
 

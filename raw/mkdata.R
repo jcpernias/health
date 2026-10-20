@@ -3,34 +3,37 @@ library(purrr)
 library(readr)
 library(glue)
 
+source("./raw/utils.R")
+
 # Read years to be included in the final database
-years <- as.integer(readLines("./years.txt", warn = FALSE))
+years <- read_years()
+
+adult_vars <- read_csv("./raw/adult-vars.csv",
+                           col_types = "cccccci")
+
+# Read adult data for a given year
+adult_yr <- function(year, adult_vars) {
+  read_microdata(year, adult_vars, "adult-vars", "adultos") |>
+    mutate(CMD1 = CMD1 / 100)
+}
+
+# Read adult data for all years
+adult_db <- map(years, \(x) adult_yr(x, adult_vars)) |>
+  bind_rows()
+
+# Number of adults by year
+adult_db |>
+  distinct(id, .keep_all = TRUE) |>
+  count(year)
+
+saveRDS(adult_db, file = "./raw/adults.rds", compress = "xz")
 
 household_vars <- read_csv("./raw/household-vars.csv",
                            col_types = "cccccci")
 
 # Read household data for a given year
 household_yr <- function(year, hh_vars) {
-  # Get position of variables in the households data files
-  path <- glue("./raw/household-vars-{year}.csv")
-  vars_yr <- hh_vars |>
-    select(var = all_of(glue("v_{year}")), type) |>
-    left_join(read_csv(path, col_types = "cii-"), join_by(var)) |>
-    mutate(end = start + len - 1)
-
-  # Use the same variable names for all years
-  vars_yr$var <- hh_vars$name
-
-  # Read the data
-  positions <- fwf_positions(start = vars_yr$start,
-                             end = vars_yr$end,
-                             col_names = vars_yr$var)
-  types <- do.call(cols, setNames(as.list(vars_yr$type), vars_yr$var))
-  read_fwf(glue("./raw/hogar_{year}.txt.xz"),
-           col_positions = positions,
-           col_types = types) |>
-    mutate(year = year, id = glue("{IDENTHOGAR}-{year}")) |>
-    select(-IDENTHOGAR)
+  read_microdata(year, hh_vars, "household-vars", "hogar")
 }
 
 # Read household data for all years
