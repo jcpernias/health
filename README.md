@@ -18,9 +18,12 @@ Los únicos años admitidos son **2014, 2017, 2020 y 2023**. Debe indicarse al m
 uno, sin repeticiones ni líneas vacías. `check-data.R` valida el formato antes
 de preparar los datos mediante `read_years()`, compartida también por el
 programa de preparación `raw/mkdata.R`. Para excluir un año, elimine su línea del archivo.
-Al modificar la selección, Make vuelve a construir los datos. Las dependencias de los
-microdatos se ajustan a los años seleccionados: cambiar un XZ seleccionado
-reconstruye los datos correspondientes, y no se exigen XZ de años excluidos.
+Al modificar la selección, Make vuelve a construir los datos. Los archivos XZ
+no son dependencias del Makefile: su existencia y sus huellas se comprueban
+mediante `check-raw-data` para los años seleccionados. Si un XZ seleccionado se
+ha modificado después del cálculo de su huella, el comprobador recalcula esa
+huella y actualiza `raw/checksums-local.csv`. Si la comprobación termina bien,
+el cambio del caché activa la reconstrucción de las bases y la documentación.
 
 La selección actual es 2014, 2020 y 2023. Incluir 2017 requiere revisar las
 correspondencias y el tratamiento de las variables no disponibles en esa edición;
@@ -87,7 +90,7 @@ adultos y hogares. `raw/mkdata.R` prepara ambos conjuntos de datos y aplica sus
 transformaciones específicas en una única ejecución.
 Make incluye este archivo entre las dependencias de la preparación de datos.
 
-Se necesita Make y R con los paquetes `tidyverse`, `writexl` y `glue`.
+Se necesita GNU Make 4.4 o posterior y R con los paquetes `tidyverse`, `writexl` y `glue`.
 La versión de `dplyr` debe incluir `recode_values`, `replace_values`,
 `filter_out` y `when_any`. Para la documentación se necesita Quarto y, para el
 PDF, LuaLaTeX y las fuentes Alegreya, Roboto y Fira Code.
@@ -98,11 +101,30 @@ Ejecute las órdenes desde la raíz del repositorio:
 make check-raw-data  # Validar años y comprobar los archivos seleccionados
 make health.xlsx    # Construir la base (también genera health.rds)
 make                # Construir la base y la documentación HTML y PDF
+make -j 8           # Comprobar primero y construir después en paralelo
 ```
 
-Make comprueba los microdatos antes de construir la base, incluso si las salidas
-ya están actualizadas. Si falta un archivo o su huella no coincide, termina con
-un error. La comprobación por sí sola no obliga a reconstruir la base.
+El destino `all` ejecuta primero `check-raw-data` y después `build`, que reúne
+las bases y la documentación. `.NOTPARALLEL: all` ordena esas dos fases;
+superada la comprobación, las tareas de `build` pueden ejecutarse en paralelo.
+Si falta un archivo o su huella no coincide, no se genera ninguna base ni
+documento, tampoco con `make -k -j 8`.
+
+Las bases, los intermedios y los documentos HTML y PDF dependen también de
+`check-raw-data` como requisito de orden. La protección se mantiene al solicitar
+esas salidas directamente o ejecutar `make build`. La comprobación se realiza
+incluso si las salidas están actualizadas, sin obligar a reconstruirlas.
+`make clean` no requiere los microdatos.
+
+El destino auxiliar `FORCE` hace que se ejecute siempre la receta de
+`raw/checksums-local.csv`, que llama al comprobador. El CSV no es un destino
+`.PHONY`: si no necesita actualizarse, conserva su fecha. La preparación de
+datos y los documentos lo tienen como dependencia normal; los documentos
+dependen también de `years.txt`. Así se reconstruyen las salidas al cambiar el
+caché o la selección de años, pero no por una comprobación sin cambios.
+Borrar o regenerar el caché puede provocar una reconstrucción adicional aunque
+los microdatos sean iguales. `make -n` muestra las órdenes sin ejecutar la
+comprobación.
 
 Las huellas de referencia no deben regenerarse para aceptar un archivo que
 falla la comprobación. Solo deben actualizarse al adoptar deliberadamente una

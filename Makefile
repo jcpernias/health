@@ -3,11 +3,6 @@ SHELL := /bin/sh
 proj-dir := .
 raw-dir := $(proj-dir)/raw
 
-# Read selected years
-selected-years := $(strip $(file < $(proj-dir)/years.txt))
-hh-microdata-files := $(addprefix $(raw-dir)/hogar_, $(addsuffix .txt.xz, $(selected-years)))
-adult-microdata-files := $(addprefix $(raw-dir)/adultos_, $(addsuffix .txt.xz, $(selected-years)))
-
 raw-data-files := $(addprefix $(raw-dir)/, $(addsuffix .rds, adults hh_common individuals))
 final-data-files := $(addprefix $(proj-dir)/health., rds xlsx)
 all-data-files := $(raw-data-files) $(final-data-files)
@@ -17,16 +12,28 @@ pdf-files := $(proj-dir)/data.pdf
 doc-files := $(html-files) $(pdf-files)
 
 
-.PHONY: all clean check-raw-data
+.PHONY: all build clean check-raw-data FORCE
 
-all: check-raw-data $(all-data-files) $(doc-files)
+# Finish validation before starting build; its prerequisites can run in parallel.
+.NOTPARALLEL: all
+all: check-raw-data build
 
-check-raw-data: $(raw-dir)/utils.R $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.txt
+build: $(all-data-files) $(doc-files)
+
+check-raw-data: $(raw-dir)/checksums-local.csv
+
+# Always validate; only a rewritten cache invalidates the generated outputs.
+FORCE:
+
+$(raw-dir)/checksums-local.csv: FORCE $(raw-dir)/utils.R $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.txt
 	Rscript "$(raw-dir)/check-data.R" "$(raw-dir)"
 
-# Validate even when generated data are already up to date, without forcing
-# their reconstruction. Also guard the recipes that produce multiple files.
-$(all-data-files) raw-data-files.intermediate final-data-files.intermediate: | check-raw-data
+# Rebuild documentation when the cache or the selected years change.
+$(doc-files): $(raw-dir)/checksums-local.csv $(proj-dir)/years.txt
+
+# Guard direct targets and make -k too, without forcing reconstruction.
+# Include documents and the recipes that produce multiple data files.
+$(all-data-files) $(doc-files) raw-data-files.intermediate final-data-files.intermediate: | check-raw-data
 
 
 $(raw-data-files): raw-data-files.intermediate
@@ -35,10 +42,9 @@ $(raw-data-files): raw-data-files.intermediate
 .INTERMEDIATE: raw-data-files.intermediate
 
 raw-data-deps := \
+	$(raw-dir)/checksums-local.csv \
 	$(proj-dir)/years.txt \
 	$(raw-dir)/utils.R \
-	$(hh-microdata-files) \
-	$(adult-microdata-files) \
 	$(raw-dir)/household-vars.csv \
 	$(raw-dir)/household-vars-2014.csv \
 	$(raw-dir)/household-vars-2017.csv \
