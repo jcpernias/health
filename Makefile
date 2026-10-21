@@ -12,7 +12,7 @@ pdf-files := $(proj-dir)/data.pdf
 doc-files := $(html-files) $(pdf-files)
 
 
-.PHONY: all build clean check-raw-data FORCE
+.PHONY: all build clean check-raw-data
 
 # Finish validation before starting build; its prerequisites can run in parallel.
 .NOTPARALLEL: all
@@ -20,16 +20,12 @@ all: check-raw-data build
 
 build: $(all-data-files) $(doc-files)
 
-check-raw-data: $(raw-dir)/checksums-local.csv
-
-# Always validate; only a rewritten cache invalidates the generated outputs.
-FORCE:
-
-$(raw-dir)/checksums-local.csv: FORCE $(raw-dir)/utils.R $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.txt
+# Recalculate selected checksums on every build, without caching them.
+check-raw-data: $(raw-dir)/utils.R $(raw-dir)/check-data.R $(raw-dir)/checksums.csv $(proj-dir)/years.txt
 	Rscript "$(raw-dir)/check-data.R" "$(raw-dir)"
 
-# Rebuild documentation when the cache or the selected years change.
-$(doc-files): $(raw-dir)/checksums-local.csv $(proj-dir)/years.txt
+# Rebuild documentation when the selected years change.
+$(doc-files): $(proj-dir)/years.txt
 
 # Guard direct targets and make -k too, without forcing reconstruction.
 # Include documents and the recipes that produce multiple data files.
@@ -42,7 +38,6 @@ $(raw-data-files): raw-data-files.intermediate
 .INTERMEDIATE: raw-data-files.intermediate
 
 raw-data-deps := \
-	$(raw-dir)/checksums-local.csv \
 	$(proj-dir)/years.txt \
 	$(raw-dir)/utils.R \
 	$(raw-dir)/household-vars.csv \

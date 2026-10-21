@@ -19,7 +19,7 @@ fnames <- expand_grid(
 
 paths <- file.path(raw_dir, fnames)
 # Si falta algún archivo, no merece la pena continuar: detener Make antes
-# de calcular huellas o modificar el caché.
+# de calcular huellas.
 not_found <- !file.exists(paths)
 if (any(not_found)) {
   cat(paste0("Missing files: ",
@@ -27,9 +27,7 @@ if (any(not_found)) {
     ".\n"))
   quit(status = 1L)
 }
-mtime <- file.mtime(paths)
-
-files <- tibble(file = fnames, path = paths, mtime = mtime)
+files <- tibble(file = fnames, path = paths)
 
 # Read expected MD5s of the uncompressed content
 expected <- read_csv(file.path(raw_dir, "checksums.csv"),
@@ -38,12 +36,20 @@ expected <- read_csv(file.path(raw_dir, "checksums.csv"),
 # Partir de files limita la comparación a los archivos seleccionados.
 # filter_out conserva también los NA para detectar referencias ausentes.
 comp <- files |>
-  left_join(read_cache(files, raw_dir), by = join_by(file)) |>
+  mutate(md5_local = map_chr(path, md5_uncompressed)) |>
   left_join(expected, by = join_by(file)) |>
   filter_out(md5_local == md5)
 
-# Fail if md5sums differ
+# Identify failures, including unreadable data and missing references.
 if (nrow(comp) != 0) {
-  print(comp)
+  cat("Microdata validation failed:\n")
+  comp |>
+    mutate(problem = case_when(
+      is.na(md5) ~ "Missing reference checksum",
+      is.na(md5_local) ~ "Cannot decompress or calculate checksum",
+      .default = "Checksum mismatch"
+    )) |>
+    select(file, problem, md5_local, md5) |>
+    print(n = Inf, width = Inf)
   quit(status = 1L)
 }

@@ -20,10 +20,11 @@ de preparar los datos mediante `read_years()`, compartida también por el
 programa de preparación `raw/mkdata.R`. Para excluir un año, elimine su línea del archivo.
 Al modificar la selección, Make vuelve a construir los datos. Los archivos XZ
 no son dependencias del Makefile: su existencia y sus huellas se comprueban
-mediante `check-raw-data` para los años seleccionados. Si un XZ seleccionado se
-ha modificado después del cálculo de su huella, el comprobador recalcula esa
-huella y actualiza `raw/checksums-local.csv`. Si la comprobación termina bien,
-el cambio del caché activa la reconstrucción de las bases y la documentación.
+mediante `check-raw-data` para los años seleccionados. En cada construcción se
+recalculan las huellas descomprimidas y se contrastan con la referencia maestra.
+Sustituir o recomprimir un XZ no provoca una reconstrucción si su contenido
+sigue coincidiendo con esa referencia. Cambiar `years.txt` reconstruye las bases
+y la documentación; se conservan también las dependencias de código y diseños.
 
 La selección actual es 2014, 2020 y 2023. Incluir 2017 requiere revisar las
 correspondencias y el tratamiento de las variables no disponibles en esa edición;
@@ -61,31 +62,18 @@ huellas de referencia se han regenerado con esta definición, tras comprobar que
 los XZ originales coincidían con las referencias anteriores.
 
 
-Los cálculos locales se guardan en `raw/checksums-local.csv`, excluido de Git,
-con tres columnas: `file`, `md5_local` y `md5_time`. Este CSV no modifica las
-referencias aceptadas de `raw/checksums.csv`.
-
-Si no existe el caché, se crea uno vacío. Para los archivos seleccionados se
-calcula el MD5 si falta su fecha de cálculo o si el archivo se ha modificado
-posteriormente. Si no hay cálculos nuevos, el CSV no se reescribe.
-
-`md5_uncompressed()` devuelve `NA_character_` si ocurre un error, incluidas las
-advertencias de descompresión. Así se continúa con los demás archivos. La fecha
-`md5_time` registra el momento del intento, también si falla: basta el MD5 ausente
-para detectar el error. Si el resultado contiene algún NA, se imprime, se
-eliminan esas filas, se guarda el caché restante y se termina con código de error
-para detener Make. Si no hay errores de cálculo, se comparan las huellas con las
-referencias aceptadas.
-
-Al trasladar o restaurar datos que conserven fechas de modificación antiguas,
-borre el caché local para forzar una nueva comprobación.
+Las huellas se calculan siempre, sin caché ni archivos auxiliares persistentes.
+Si falta algún microdato seleccionado, se muestran los nombres y se termina
+antes de calcular huellas. Si una huella difiere de la referencia, se muestran
+el archivo, la huella calculada y la esperada. También se identifican los fallos
+de descompresión o cálculo y las referencias ausentes. Cualquiera de estos
+problemas termina con error para detener la construcción.
 
 ## Requisitos y construcción
 
 Las funciones compartidas se encuentran en `raw/utils.R`: `read_years()` lee y
 valida la selección; `decompress_xz()` y `md5_uncompressed()` descomprimen y
-calculan huellas; `read_cache()` mantiene el caché local de huellas;
-`read_microdata()` reúne la lectura y armonización común de
+calculan huellas; `read_microdata()` reúne la lectura y armonización común de
 adultos y hogares. `raw/mkdata.R` prepara ambos conjuntos de datos y aplica sus
 transformaciones específicas en una única ejecución.
 Make incluye este archivo entre las dependencias de la preparación de datos.
@@ -116,23 +104,18 @@ esas salidas directamente o ejecutar `make build`. La comprobación se realiza
 incluso si las salidas están actualizadas, sin obligar a reconstruirlas.
 `make clean` no requiere los microdatos.
 
-El destino auxiliar `FORCE` hace que se ejecute siempre la receta de
-`raw/checksums-local.csv`, que llama al comprobador. El CSV no es un destino
-`.PHONY`: si no necesita actualizarse, conserva su fecha. La preparación de
-datos y los documentos lo tienen como dependencia normal; los documentos
-dependen también de `years.txt`. Así se reconstruyen las salidas al cambiar el
-caché o la selección de años, pero no por una comprobación sin cambios.
-Borrar o regenerar el caché puede provocar una reconstrucción adicional aunque
-los microdatos sean iguales. `make -n` muestra las órdenes sin ejecutar la
-comprobación.
+La comprobación no modifica las huellas maestras ni las salidas. Los documentos
+HTML y PDF dependen normalmente de `years.txt`, al igual que la preparación de
+datos. `make -n` muestra las órdenes sin ejecutar la comprobación.
 
 Las huellas de referencia no deben regenerarse para aceptar un archivo que
 falla la comprobación. Solo deben actualizarse al adoptar deliberadamente una
 nueva versión de los microdatos y revisar su procedencia.
+Si se adopta una nueva versión y se cambian las referencias maestras, ejecutar
+`make clean` y después `make -j 8` para reconstruir las salidas con esos datos.
 
 ## Archivos generados
 
-- `raw/checksums-local.csv`: cálculos MD5 locales reutilizables.
 - `raw/adults.rds`, `raw/hh_common.rds` y `raw/individuals.rds`: datos intermedios
   generados conjuntamente por `raw/mkdata.R`.
 - `health.rds`: base con variables originales y derivadas.
@@ -140,4 +123,4 @@ nueva versión de los microdatos y revisar su procedencia.
 - `data.html` y `data.pdf`: documentación elaborada a partir de `data.qmd`.
 
 `make clean` elimina las salidas anteriores; conserva los microdatos XZ y sus
-huellas de referencia y los cálculos locales.
+huellas de referencia.
